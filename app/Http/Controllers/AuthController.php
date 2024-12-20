@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\RoleHelper;
-use App\Http\Requests\Auth\LoginRequest;
 use App\Models\Cart;
 use App\Models\User;
+use App\Helpers\Cryptor;
+use App\Helpers\RoleHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 
 class AuthController extends Controller
@@ -55,17 +56,17 @@ class AuthController extends Controller
     {
         try {
             $user = User::where('username', $request->credentials)
-            ->orWhere('email', $request->credentials)
-            ->first();
+                ->orWhere('email', $request->credentials)
+                ->first();
 
-            if(!isset($user)) {
+            if (!isset($user)) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Invalid Credentials'
                 ], 401);
             }
 
-            if(Hash::check($request->password, $user->password)) {
+            if (Hash::check($request->password, $user->password)) {
                 \Log::info('hash');
                 $user->tokens()->delete();
                 $user->save();
@@ -100,6 +101,33 @@ class AuthController extends Controller
                 'status' => 'error',
                 'message' => 'Invalid credentials.'
             ], 401);
+        }
+    }
+
+    public function profile()
+    {
+        try {
+            $user = User::find(auth()->user()->id);
+
+            if (!isset($user)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No user found.',
+                ], 404);
+            }
+
+            $user->_id = Cryptor::encrypt($user->id);
+            $user['role'] = RoleHelper::getName($user->role);
+
+            unset($user->id, $user->created_by, $user->updated_by, $user->created_at, $user->updated_at);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Profile retrieved.',
+                'data' => $user
+            ]);
+        } catch (\Exception $e) {
+            \Log::info($e);
         }
     }
 }
