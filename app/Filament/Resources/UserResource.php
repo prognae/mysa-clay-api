@@ -20,6 +20,8 @@ class UserResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
+    protected static ?string $label = 'Users | FIRST COMMIT';
+
     public static function form(Form $form): Form
     {
         return $form
