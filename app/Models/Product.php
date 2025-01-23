@@ -15,6 +15,7 @@ class Product extends Model
         'name',
         'description',
         'category_id',
+        'collection_id',
         'price',
         'quantity',
         'status',
@@ -39,6 +40,11 @@ class Product extends Model
     public function category()
     {
         return $this->hasOne(Category::class, 'id', 'category_id');
+    }
+
+    public function collection()
+    {
+        return $this->hasOne(Collection::class, 'id', 'collection_id');
     }
 
     public function comments()

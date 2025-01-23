@@ -67,7 +67,6 @@ class AuthController extends Controller
             }
 
             if (Hash::check($request->password, $user->password)) {
-                \Log::info('hash');
                 $user->tokens()->delete();
                 $user->save();
 

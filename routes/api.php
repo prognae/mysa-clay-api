@@ -19,5 +19,6 @@ Route::prefix('auth')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('shop')->group(function () {
         Route::get('banners', [ShopController::class, 'banners']);
+        Route::get('collections', [ShopController::class, 'collections']);
     });
 });
