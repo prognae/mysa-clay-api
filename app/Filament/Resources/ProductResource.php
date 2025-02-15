@@ -22,6 +22,7 @@ use App\Filament\Resources\ProductResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Models\Collection;
+use Illuminate\Validation\Rule;
 
 class ProductResource extends Resource
 {
@@ -75,10 +76,86 @@ class ProductResource extends Resource
                         TextInput::make('price')
                             ->numeric()
                             ->prefix('₱')
+                            ->label('Original Price')
+                            ->columnSpan(2)
+                            ->afterStateUpdated(fn ($set, $state, $get) => 
+                                $set('final_price', $get('discounted_price') != null ? $get('discounted_price') : $state - ($state * ($get('markdown') != null ? $get('markdown') * 0.01 : 0)))
+                            )
+                            ->reactive()
                             ->required(),
 
                         TextInput::make('quantity')
                             ->numeric()
+                            ->default(1)
+                            ->columnSpan(1)
+                            ->required(),
+
+                        Select::make('is_discounted')  
+                            ->label('Discounted')
+                            ->options([
+                                1 => 'Yes',
+                                0 => 'No',
+                            ])
+                            ->default(0)
+                            ->searchable() 
+                            ->required()
+                            ->reactive()
+                            ->columnSpan(1),
+
+                        TextInput::make('discounted_price')
+                            ->numeric()
+                            ->prefix('₱')
+                            ->label('Discounted Price')
+                            ->columnSpan(2)
+                            ->visible(fn ($get) => $get('is_discounted') == 1)
+                            ->disabled(fn ($get) => $get('markdown') != null)
+                            ->dehydrated(true)
+                            ->afterStateUpdated(fn ($set, $state, $get) => 
+                                $set('final_price', $state != null ? $state : $get('price') - ($get('price') * ($get('markdown') != null ? $get('markdown') * 0.01 : 0)))
+                            )                            
+                            ->reactive()
+                            ->rule(function ($state, $get) {
+                                return Rule::when(
+                                    $state !== null,
+                                    fn () => 'lt:' . ($get('price') ?? 0) 
+                                );
+                            })
+                            ->helperText('Must be lower than the original price.'),
+
+                        // TextInput::make('markup')
+                        //     ->numeric()
+                        //     ->suffix('%')
+                        //     ->label('Markup')
+                        //     ->columnSpan(1)
+                        //     ->visible(fn ($get) => $get('is_discounted') == 1)
+                        //     ->reactive()
+                        //     ->afterStateUpdated(fn ($set, $state, $get) => 
+                        //         $set('final_price', $get('price') + ($get('price') * ($state * .01)))
+                        //     )
+                        //     ->disabled(fn ($get) => $get('discounted_price') != null || $get('markdown') != null),
+                        //     // ->dehydrated(fn ($get) => $get('discounted_price') != null),
+
+                        TextInput::make('markdown')
+                            ->numeric()
+                            ->suffix('%')
+                            ->label('Markdown')
+                            ->columnSpan(1)
+                            ->visible(fn ($get) => $get('is_discounted') == 1)
+                            ->reactive()
+                            ->afterStateUpdated(fn ($set, $state, $get) => 
+                                $set('final_price', $get('price') - ($get('price') * ($state * 0.01)))
+                            )
+                            ->disabled(fn ($get) => $get('discounted_price') != null)
+                            ->dehydrated(true),
+
+                        TextInput::make('final_price')
+                            ->numeric()
+                            ->prefix('₱')
+                            ->label('Final Price')
+                            ->columnSpan(2)
+                            ->visible(fn ($get) => $get('is_discounted') == 1)
+                            ->disabled()
+                            ->dehydrated(true)
                             ->required(),
 
                         MarkdownEditor::make('description')

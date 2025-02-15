@@ -20,6 +20,11 @@ class Product extends Model
         'quantity',
         'status',
         'thumbnail_url',
+        'is_discounted',
+        'discounted_price',
+        'markup',
+        'markdown',
+        'final_price',
     ];
 
     public function user()

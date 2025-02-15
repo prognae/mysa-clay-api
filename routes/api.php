@@ -20,5 +20,6 @@ Route::prefix('auth')->group(function () {
     Route::prefix('shop')->group(function () {
         Route::get('banners', [ShopController::class, 'banners']);
         Route::get('collections', [ShopController::class, 'collections']);
+        Route::get('products', [ShopController::class, 'products']);
     });
 // });
