@@ -7,12 +7,16 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
-    Route::post('login', [AuthController::class, 'login']);
+    Route::post('login', [AuthController::class, 'login']);    
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('profile', [AuthController::class, 'profile']);
 
         Route::any('logout', [AuthController::class, 'logout']);
+
+        Route::get('broadcast-player', [AuthController::class, 'broadcastToPlayer']);
+
+        Route::get('broadcast-admin', [AuthController::class, 'broadcastToAdmins']);
     });
 });
 

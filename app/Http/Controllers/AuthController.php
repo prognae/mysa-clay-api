@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\AdminNotificationEvent;
+use App\Events\TestEvent;
+use App\Events\UserNotificationEvent;
 use App\Models\Cart;
 use App\Models\User;
 use App\Helpers\Cryptor;
@@ -147,5 +150,28 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             \Log::info($e);
         }
+    }
+
+    public function broadcast(Request $request)
+    {
+        TestEvent::dispatch(auth()->user(), $request->message);
+    }
+
+    public function broadcastToPlayer()
+    {
+        $message = 'Successful Deposit';
+
+        $user = User::where('id', 2)->first();
+
+        UserNotificationEvent::dispatch($user, $message);
+    }
+
+    public function broadcastToAdmins()
+    {
+        $user = User::where('id', 2)->first();
+
+        $message = 'Player ' . $user->username . ' sumbitted a deposit';
+
+        AdminNotificationEvent::dispatch($user, $message);
     }
 }
