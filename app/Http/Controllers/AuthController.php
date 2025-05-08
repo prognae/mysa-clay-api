@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Cart;
-use App\Models\User;
 use App\Helpers\Cryptor;
 use App\Helpers\RoleHelper;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Models\Cart;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -27,18 +26,18 @@ class AuthController extends Controller
                 'username' => $request->username,
                 'password' => Hash::make($request->password),
                 'status' => 1,
-                'role' => RoleHelper::getKey('customer')
+                'role' => RoleHelper::getKey('customer'),
             ]);
 
             Cart::firstOrCreate([
-                'user_id' => $user->id
+                'user_id' => $user->id,
             ]);
 
             DB::commit();
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Account registration successful!'
+                'message' => 'Account registration successful!',
             ]);
         } catch (\Exception $e) {
             \Log::info($e);
@@ -47,7 +46,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 422);
         }
     }
@@ -55,14 +54,14 @@ class AuthController extends Controller
     public function login(LoginRequest $request)
     {
         try {
-            $user = User::where('username', $request->credentials)
-                ->orWhere('email', $request->credentials)
+            $user = User::where('username', $request->credential)
+                ->orWhere('email', $request->credential)
                 ->first();
 
-            if (!isset($user)) {
+            if (! isset($user)) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Invalid Credentials'
+                    'message' => 'Invalid Credentials',
                 ], 401);
             }
 
@@ -84,13 +83,13 @@ class AuthController extends Controller
                         'username' => $user->username,
                         'access_token' => $token,
                         'token_type' => 'Bearer',
-                        'role' => $role
-                    ]
+                        'role' => $role,
+                    ],
                 ]);
             } else {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Invalid credentials.'
+                    'message' => 'Invalid credentials.',
                 ], 401);
             }
         } catch (\Exception $e) {
@@ -98,7 +97,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Invalid credentials.'
+                'message' => 'Invalid credentials.',
             ], 401);
         }
     }
@@ -110,14 +109,14 @@ class AuthController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Account logged out successfully.'
+                'message' => 'Account logged out successfully.',
             ], 200);
         } catch (\Exception $e) {
             \Log::info($e);
 
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 422);
         }
     }
@@ -127,7 +126,7 @@ class AuthController extends Controller
         try {
             $user = User::find(auth()->user()->id);
 
-            if (!isset($user)) {
+            if (! isset($user)) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'No user found.',
@@ -142,7 +141,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 'success',
                 'message' => 'Profile retrieved.',
-                'data' => $user
+                'data' => $user,
             ]);
         } catch (\Exception $e) {
             \Log::info($e);
