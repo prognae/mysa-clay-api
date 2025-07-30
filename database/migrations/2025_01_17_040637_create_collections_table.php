@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('collections', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('description')->nullable();
+            $table->text('description')->nullable();
             $table->string('thumbnail_url');
             $table->string('thumbnail_banner_url')->nullable();
             $table->unsignedTinyInteger('status')->default(1);
